@@ -3,12 +3,12 @@
 @tailwind utilities;
 
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dotgothic16), serif;
 }
 
 h1 {
   font-size: 2rem;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dotgothic16), serif;
 }
 
 @layer base {
@@ -74,4 +74,10 @@ h1 {
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.dotgothic16-regular {
+  font-family: var(--font-dotgothic16), serif;
+  font-weight: 400;
+  font-style: normal;
 }

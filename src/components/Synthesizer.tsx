@@ -16,7 +16,7 @@ export function Synthesizer() {
     const newRecordedSample: RecordedSample = {
       id: uuidv4(),
       buffer,
-      name: `サンプル ${recordedSamples.length + 1}`,
+      name: `録音音源 ${recordedSamples.length + 1}`,
       startTime: 0,
       endTime: buffer.duration,
     };
@@ -37,8 +37,12 @@ export function Synthesizer() {
 
   return (
     <div className="min-h-screen p-4 bg-slate-800 text-white">
-      <h1 className="text-6xl font-bold mb-6 text-left text-primary">
-        <img src="/images/logo.svg" alt="browserMIDI ロゴ" />
+      <h1 className="text-8xl font-bold mb-6 text-right text-primary ml-auto mr-0 w-auto">
+        <img
+          src="/images/logo.svg"
+          alt="browserMIDI ロゴ"
+          className="ml-auto mr-0 w-auto align-center"
+        />
       </h1>
 
       <div className="grid grid-cols-1 gap-6">
@@ -74,7 +78,7 @@ export function Synthesizer() {
           </div>
           {selectedSampleId && (
             <div className="mt-6">
-              <h3 className="text-xl font-semibold mb-2">サンプル編集</h3>
+              <h3 className="text-xl font-semibold mb-2">音源編集</h3>
               <SampleEditor
                 sample={recordedSamples.find((s) => s.id === selectedSampleId)!}
                 onUpdate={handleSampleUpdate}

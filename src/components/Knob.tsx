@@ -16,7 +16,7 @@ export function Knob({
   value,
   onChange,
   size = 60,
-  color = "#3b82f6",
+  color = "#4a4a4a",
   label,
 }: KnobProps) {
   const [angle, setAngle] = useState(0);

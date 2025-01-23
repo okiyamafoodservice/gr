@@ -172,7 +172,7 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
             max={1}
             value={masterVolume}
             onChange={setMasterVolume}
-            label="マスター音量"
+            label="MASTER VOLUME"
             size={50}
             color="hsl(var(--primary))"
           />

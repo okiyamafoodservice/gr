@@ -1,15 +1,18 @@
-import React from "react"
-import { Slider } from "@/components/ui/slider"
+import React from "react";
+import { Slider } from "@/components/ui/slider";
 
 interface BPMSliderProps {
-  bpm: number
-  onBPMChange: (value: number) => void
+  bpm: number;
+  onBPMChange: (value: number) => void;
 }
 
 export function BPMSlider({ bpm, onBPMChange }: BPMSliderProps) {
   return (
     <div className="mb-4 landscape:mb-0 landscape:flex landscape:items-center landscape:space-x-2">
-      <label htmlFor="bpm-slider" className="block text-sm font-medium text-gray-700 landscape:whitespace-nowrap">
+      <label
+        htmlFor="bpm-slider"
+        className="block text-4xl font-extrabold text-gray-100 landscape:whitespace-nowrap"
+      >
         BPM: {bpm}
       </label>
       <Slider
@@ -23,6 +26,5 @@ export function BPMSlider({ bpm, onBPMChange }: BPMSliderProps) {
         aria-label="BPM調整"
       />
     </div>
-  )
+  );
 }
-

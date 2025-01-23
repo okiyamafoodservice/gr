@@ -61,7 +61,7 @@ export function TrackEditor({
             <SelectItem value="synth">シンセ</SelectItem>
             <SelectItem value="snare">スネア</SelectItem>
             <SelectItem value="hihat">ハイハット</SelectItem>
-            <SelectItem value="kick">いってなにしてんねん</SelectItem>
+            <SelectItem value="kick">キック</SelectItem>
             <SelectItem value="recordedSample">録音サンプル</SelectItem>
           </SelectContent>
         </Select>
@@ -85,45 +85,64 @@ export function TrackEditor({
           size="sm"
           className="synth-button"
         >
-          トラックを消す
+          削除
         </Button>
       </div>
       <div className="overflow-x-auto">
-        <div className="inline-flex space-x-4 mb-2 justify-between">
+        <div className="flex w-full space-x-1 mb-2 justify-between">
           {track.steps.map((step, index) => (
             <div key={index} className="flex flex-col items-center w-8">
-              <input
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={step.volume}
-                onChange={(e) =>
-                  handleVolumeChange(index, parseFloat(e.target.value))
-                }
-                className="w-8 h-24 appearance-none bg-gray-200 rounded-full overflow-hidden transform rotate-180"
-                style={{
-                  WebkitAppearance: "slider-vertical",
-                  opacity: step.active ? 1 : 0.5,
-                }}
-                disabled={!step.active}
-              />
-              <Button
+              <div
+                className="relative w-1 h-32 bg-gray-200 rounded-sm  cursor-pointer"
                 onClick={() => handleStepToggle(index)}
-                variant={step.active ? "default" : "outline"}
-                className={`w-8 h-8 p-0 text-xs mt-1 ${
-                  step.active ? "synth-button" : "synth-button opacity-50"
-                }`}
+                onMouseDown={(e) => {
+                  e.stopPropagation();
+                  const handleMouseMove = (e: MouseEvent) => {
+                    const rect = (
+                      e.target as HTMLElement
+                    ).getBoundingClientRect();
+                    const volume =
+                      1 -
+                      Math.max(
+                        0,
+                        Math.min(1, (e.clientY - rect.top) / rect.height)
+                      );
+                    handleVolumeChange(index, volume);
+                  };
+                  const handleMouseUp = () => {
+                    window.removeEventListener("mousemove", handleMouseMove);
+                    window.removeEventListener("mouseup", handleMouseUp);
+                  };
+                  window.addEventListener("mousemove", handleMouseMove);
+                  window.addEventListener("mouseup", handleMouseUp);
+                  handleMouseMove(e.nativeEvent);
+                }}
+                style={{
+                  backgroundColor: step.active ? "black" : "#e5e7eb",
+                }}
                 aria-label={`ステップ ${index + 1}, アクティブ: ${
                   step.active ? "はい" : "いいえ"
                 }, 音量: ${Math.round(step.volume * 100)}%`}
+                role="slider"
+                aria-valuemin={0}
+                aria-valuemax={1}
+                aria-valuenow={step.volume}
               >
-                {index + 1}
-              </Button>
+                <div
+                  className="absolute w-6 h-6 p-0 text-xs transform -translate-x-1/2 left-1/2 rounded-none flex items-center justify-center"
+                  style={{
+                    bottom: `${step.volume * 100}%`,
+                    transition: "bottom 0.1s ease-out",
+                    backgroundColor: step.active ? "#666" : "#9ca3af",
+                  }}
+                >
+                  {index + 1}
+                </div>
+              </div>
             </div>
           ))}
         </div>
-        <div className="inline-flex space-x-4 mb-2">
+        <div className="flex w-full space-x-1 mb-2 justify-between">
           {track.steps.map((step, index) => (
             <Select
               key={index}

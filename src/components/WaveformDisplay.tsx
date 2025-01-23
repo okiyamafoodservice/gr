@@ -58,10 +58,10 @@ export function WaveformDisplay({
     const startX = (startTime / buffer.duration) * width;
     const endX = (endTime / buffer.duration) * width;
 
-    ctx.fillStyle = "rgba(59, 130, 246, 0.5)";
+    ctx.fillStyle = "rgba(59, 130, 246, 0.1)";
     ctx.fillRect(startX, 0, endX - startX, height);
 
-    ctx.fillStyle = "#3b82f6";
+    ctx.fillStyle = "#eb4034";
     ctx.fillRect(startX - 2, 0, 4, height);
     ctx.fillRect(endX - 2, 0, 4, height);
   }, [buffer, width, height, startTime, endTime]);
