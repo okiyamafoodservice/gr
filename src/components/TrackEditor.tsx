@@ -85,11 +85,11 @@ export function TrackEditor({
           size="sm"
           className="synth-button"
         >
-          削除
+          トラックを消す
         </Button>
       </div>
       <div className="overflow-x-auto">
-        <div className="inline-flex space-x-1 mb-2">
+        <div className="inline-flex space-x-4 mb-2 justify-between">
           {track.steps.map((step, index) => (
             <div key={index} className="flex flex-col items-center w-8">
               <input
@@ -123,7 +123,7 @@ export function TrackEditor({
             </div>
           ))}
         </div>
-        <div className="inline-flex space-x-1 mb-2">
+        <div className="inline-flex space-x-4 mb-2">
           {track.steps.map((step, index) => (
             <Select
               key={index}

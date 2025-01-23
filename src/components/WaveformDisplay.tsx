@@ -33,7 +33,7 @@ export function WaveformDisplay({
     const step = Math.ceil(data.length / width);
     const amp = height / 2;
 
-    ctx.fillStyle = "#f3f4f6";
+    ctx.fillStyle = "#5e5e5e";
     ctx.fillRect(0, 0, width, height);
 
     ctx.beginPath();
@@ -51,7 +51,7 @@ export function WaveformDisplay({
       ctx.lineTo(i, (1 + max) * amp);
     }
 
-    ctx.strokeStyle = "#4b5563";
+    ctx.strokeStyle = "#0bfc03";
     ctx.stroke();
 
     // Draw start and end markers

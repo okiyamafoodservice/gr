@@ -164,8 +164,7 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
 
   return (
     <div className="synth-panel p-4">
-      <h2 className="text-2xl font-bold mb-4">シーケンサー</h2>
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center mb-4">
         <div className="flex items-center space-x-4">
           <BPMSlider bpm={bpm} onBPMChange={setBpm} />
           <Knob

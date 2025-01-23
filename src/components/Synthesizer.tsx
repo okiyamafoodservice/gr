@@ -36,9 +36,9 @@ export function Synthesizer() {
   }
 
   return (
-    <div className="min-h-screen p-4 bg-orange-500 text-white">
+    <div className="min-h-screen p-4 bg-slate-800 text-white">
       <h1 className="text-6xl font-bold mb-6 text-left text-primary">
-        Webシンセ
+        <img src="/images/logo.svg" alt="browserMIDI ロゴ" />
       </h1>
 
       <div className="grid grid-cols-1 gap-6">
@@ -46,14 +46,16 @@ export function Synthesizer() {
           <Sequencer recordedSamples={recordedSamples} />
         </div>
         <div className="synth-panel p-4">
-          <h2 className="text-2xl font-bold mb-4">音声録音</h2>
+          <h2 className="text-2xl font-bold mb-4 text-red-500">音声録音</h2>
           <VoiceRecorder
             onRecordingComplete={handleRecordingComplete}
             audioContext={audioContext}
           />
 
           <div className="mt-6">
-            <h3 className="text-xl font-semibold mb-2">録音済みサウンド</h3>
+            <h3 className="text-xl font-semibold mb-2 text-red-500">
+              録音済みサウンド
+            </h3>
             <ul className="space-y-2">
               {recordedSamples.map((sample) => (
                 <li
@@ -61,7 +63,7 @@ export function Synthesizer() {
                   className="flex items-center justify-between"
                 >
                   <button
-                    className="text-primary hover:text-primary-foreground transition-colors"
+                    className="text-primary hover:text-primary-foreground transition-colors text-white"
                     onClick={() => setSelectedSampleId(sample.id)}
                   >
                     {sample.name}

@@ -97,41 +97,46 @@ export const soundFiles = {
 
 export function applyFadeOut(
   context: AudioContext,
-  source: AudioNode,
+  param: AudioParam,
   duration = 0.05
-): GainNode {
-  const gainNode = context.createGain();
-  source.connect(gainNode);
-
-  gainNode.gain.setValueAtTime(1, context.currentTime);
-  gainNode.gain.linearRampToValueAtTime(0, context.currentTime + duration);
-
-  return gainNode;
+): void {
+  const now = context.currentTime;
+  param.setValueAtTime(param.value, now);
+  param.linearRampToValueAtTime(0, now + duration);
 }
 
 export function playSound(
   context: AudioContext,
   source: AudioScheduledSourceNode,
-  duration = 0.1,
-  fadeOutDuration = 0.05
+  gainNode: GainNode
 ): void {
-  const fadeOutNode = applyFadeOut(context, source, fadeOutDuration);
-  fadeOutNode.connect(context.destination);
+  source.connect(gainNode);
+  gainNode.connect(context.destination);
 
   source.start();
-  source.stop(context.currentTime + duration);
+
+  if (source instanceof AudioBufferSourceNode && source.buffer) {
+    const duration = source.buffer.duration;
+    applyFadeOut(context, gainNode.gain, 0.05);
+    source.stop(context.currentTime + duration);
+  }
 }
 
-export function createKick(context: AudioContext): OscillatorNode {
-  const oscillator = context.createOscillator();
-  oscillator.type = "sine";
-  oscillator.frequency.setValueAtTime(150, context.currentTime);
-  oscillator.frequency.exponentialRampToValueAtTime(
+export function createKick(context: AudioContext): AudioBufferSourceNode {
+  const buffer = createNoiseBuffer(context);
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+
+  const lowpass = context.createBiquadFilter();
+  lowpass.type = "lowpass";
+  lowpass.frequency.setValueAtTime(150, context.currentTime);
+  lowpass.frequency.exponentialRampToValueAtTime(
     0.01,
     context.currentTime + 0.5
   );
 
-  return oscillator;
+  source.connect(lowpass);
+  return source;
 }
 
 interface EnvelopeOptions {
@@ -145,7 +150,7 @@ export function applyEnvelope(
   context: AudioContext,
   param: AudioParam,
   options: Partial<EnvelopeOptions> = {}
-) {
+): void {
   const { attack = 0.05, decay = 0.1, sustain = 0.7, release = 0.2 } = options;
   const now = context.currentTime;
 
@@ -153,4 +158,14 @@ export function applyEnvelope(
   param.linearRampToValueAtTime(1, now + attack);
   param.linearRampToValueAtTime(sustain, now + attack + decay);
   param.linearRampToValueAtTime(0, now + attack + decay + release);
+}
+
+export async function loadAndCacheSounds(
+  context: AudioContext
+): Promise<Record<string, AudioBuffer>> {
+  const soundBuffers: Record<string, AudioBuffer> = {};
+  for (const [key, path] of Object.entries(soundFiles)) {
+    soundBuffers[key] = await loadAudioFile(context, path);
+  }
+  return soundBuffers;
 }
