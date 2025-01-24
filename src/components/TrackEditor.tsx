@@ -83,7 +83,7 @@ export function TrackEditor({
           onClick={onDelete}
           variant="destructive"
           size="sm"
-          className="synth-button"
+          className="synth-button bg-slate-500"
         >
           削除
         </Button>
@@ -93,7 +93,7 @@ export function TrackEditor({
           {track.steps.map((step, index) => (
             <div key={index} className="flex flex-col items-center w-8">
               <div
-                className="relative w-1 h-32 bg-gray-200 rounded-sm  cursor-pointer"
+                className="relative w-1 h-32 bg-gray-200 rounded-none  cursor-pointer"
                 onClick={() => handleStepToggle(index)}
                 onMouseDown={(e) => {
                   e.stopPropagation();
@@ -118,7 +118,9 @@ export function TrackEditor({
                   handleMouseMove(e.nativeEvent);
                 }}
                 style={{
-                  backgroundColor: step.active ? "black" : "#e5e7eb",
+                  backgroundColor: step.active
+                    ? "black"
+                    : "#e5e7eb landscape:whitespace-nowrap",
                 }}
                 aria-label={`ステップ ${index + 1}, アクティブ: ${
                   step.active ? "はい" : "いいえ"

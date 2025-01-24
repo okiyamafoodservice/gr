@@ -50,14 +50,14 @@ export function Synthesizer() {
           <Sequencer recordedSamples={recordedSamples} />
         </div>
         <div className="synth-panel p-4">
-          <h2 className="text-2xl font-bold mb-4 text-red-500">音声録音</h2>
+          <h2 className=" font-bold mb-4 text-3xl text-slate-50">音声録音</h2>
           <VoiceRecorder
             onRecordingComplete={handleRecordingComplete}
             audioContext={audioContext}
           />
 
           <div className="mt-6">
-            <h3 className="text-xl font-semibold mb-2 text-red-500">
+            <h3 className="text-xl font-semibold mb-2 text-slate-50">
               録音済みサウンド
             </h3>
             <ul className="space-y-2">
@@ -78,7 +78,9 @@ export function Synthesizer() {
           </div>
           {selectedSampleId && (
             <div className="mt-6">
-              <h3 className="text-xl font-semibold mb-2">音源編集</h3>
+              <h3 className="text-xl font-semibold mb-2 tracking-wide ">
+                RECORD SOUND EDITOR
+              </h3>
               <SampleEditor
                 sample={recordedSamples.find((s) => s.id === selectedSampleId)!}
                 onUpdate={handleSampleUpdate}
