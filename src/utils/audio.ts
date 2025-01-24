@@ -146,18 +146,34 @@ interface EnvelopeOptions {
   release: number;
 }
 
-export function applyEnvelope(
-  context: AudioContext,
-  param: AudioParam,
-  options: Partial<EnvelopeOptions> = {}
-): void {
-  const { attack = 0.05, decay = 0.1, sustain = 0.7, release = 0.2 } = options;
-  const now = context.currentTime;
+export function createEnvelopeGain(context: AudioContext): GainNode {
+  const gainNode = context.createGain();
+  gainNode.gain.setValueAtTime(0, context.currentTime);
+  return gainNode;
+}
 
-  param.setValueAtTime(0, now);
-  param.linearRampToValueAtTime(1, now + attack);
-  param.linearRampToValueAtTime(sustain, now + attack + decay);
-  param.linearRampToValueAtTime(0, now + attack + decay + release);
+export function applyEnvelope(
+  gainNode: GainNode,
+  context: AudioContext,
+  attackTime: number,
+  decayTime: number,
+  sustainLevel: number,
+  releaseTime: number
+): void {
+  const now = context.currentTime;
+  gainNode.gain.linearRampToValueAtTime(1, now + attackTime);
+  gainNode.gain.linearRampToValueAtTime(
+    sustainLevel,
+    now + attackTime + decayTime
+  );
+  gainNode.gain.setValueAtTime(
+    sustainLevel,
+    now + attackTime + decayTime + 0.1
+  ); // サステイン期間を追加
+  gainNode.gain.linearRampToValueAtTime(
+    0,
+    now + attackTime + decayTime + 0.1 + releaseTime
+  );
 }
 
 export async function loadAndCacheSounds(

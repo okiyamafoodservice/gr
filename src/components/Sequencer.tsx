@@ -1,3 +1,4 @@
+// Sequencer.tsx
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
@@ -17,6 +18,8 @@ import {
   createKick,
   pitches,
   type PitchName,
+  createEnvelopeGain,
+  applyEnvelope,
 } from "@/utils/audio";
 import { Knob } from "./Knob";
 
@@ -37,9 +40,8 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
       id: uuidv4(),
       soundType: "synth",
       steps: Array(TOTAL_STEPS).fill({
-        active: false,
         pitch: "C" as PitchName,
-        volume: 0.5,
+        volume: 0, // 初期音量をゼロに設定
       }),
     };
     setTracks([...tracks, newTrack]);
@@ -66,45 +68,36 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
     ) => {
       if (!audioContext) return;
 
-      const gainNode = audioContext.createGain();
-      gainNode.gain.setValueAtTime(
-        volume * masterVolume,
+      const masterGainNode = audioContext.createGain();
+      masterGainNode.gain.setValueAtTime(
+        masterVolume,
         audioContext.currentTime
       );
-      gainNode.connect(audioContext.destination);
+      masterGainNode.connect(audioContext.destination);
+
+      const envelopeGain = createEnvelopeGain(audioContext);
+      envelopeGain.connect(masterGainNode);
 
       let source: OscillatorNode | AudioBufferSourceNode;
 
       switch (soundType) {
         case "synth":
           source = createOscillator(audioContext, pitches[pitch]);
+          applyEnvelope(envelopeGain, audioContext, 0.01, 0.1, 0.7, 0.2);
           break;
         case "snare":
           source = audioContext.createBufferSource();
           source.buffer = createNoiseBuffer(audioContext);
-          gainNode.gain.setValueAtTime(
-            volume * masterVolume,
-            audioContext.currentTime
-          );
-          gainNode.gain.exponentialRampToValueAtTime(
-            0.01,
-            audioContext.currentTime + 0.2
-          );
+          applyEnvelope(envelopeGain, audioContext, 0.005, 0.05, 0.1, 0.1);
           break;
         case "hihat":
           source = audioContext.createBufferSource();
           source.buffer = createNoiseBuffer(audioContext);
-          gainNode.gain.setValueAtTime(
-            volume * masterVolume,
-            audioContext.currentTime
-          );
-          gainNode.gain.exponentialRampToValueAtTime(
-            0.01,
-            audioContext.currentTime + 0.05
-          );
+          applyEnvelope(envelopeGain, audioContext, 0.001, 0.02, 0.05, 0.05);
           break;
         case "kick":
           source = createKick(audioContext);
+          applyEnvelope(envelopeGain, audioContext, 0.005, 0.1, 0.5, 0.1);
           break;
         case "recordedSample":
           if (sampleId) {
@@ -112,6 +105,7 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
             if (sample) {
               source = audioContext.createBufferSource();
               source.buffer = sample.buffer;
+              applyEnvelope(envelopeGain, audioContext, 0.005, 0.1, 0.7, 0.2);
               source.start(
                 0,
                 sample.startTime,
@@ -130,12 +124,12 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
           return;
       }
 
-      source.connect(gainNode);
+      source.connect(envelopeGain);
+      envelopeGain.gain.setValueAtTime(volume, audioContext.currentTime);
+
       if (soundType !== "recordedSample") {
         source.start();
-        setTimeout(() => {
-          source.stop();
-        }, 100);
+        source.stop(audioContext.currentTime + 0.5); // 再生時間を0.5秒に延長
       }
     },
     [audioContext, recordedSamples, masterVolume]
@@ -156,7 +150,7 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
 
     tracks.forEach((track) => {
       const step = track.steps[currentStep];
-      if (step.active) {
+      if (step.volume > 0) {
         playSound(track.soundType, step.pitch, step.volume, track.sampleId);
       }
     });

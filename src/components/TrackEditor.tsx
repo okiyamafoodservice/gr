@@ -1,3 +1,4 @@
+// TrackEditor.tsx
 "use client";
 import React from "react";
 import type { Track, RecordedSample } from "@/types/music";
@@ -24,21 +25,15 @@ export function TrackEditor({
   onDelete,
   recordedSamples,
 }: TrackEditorProps) {
-  const handleStepToggle = (index: number) => {
+  const handleVolumeChange = (index: number, volume: number) => {
     const newSteps = [...track.steps];
-    newSteps[index] = { ...newSteps[index], active: !newSteps[index].active };
+    newSteps[index] = { ...newSteps[index], volume };
     onUpdate({ ...track, steps: newSteps });
   };
 
   const handlePitchChange = (index: number, pitch: PitchName) => {
     const newSteps = [...track.steps];
     newSteps[index] = { ...newSteps[index], pitch };
-    onUpdate({ ...track, steps: newSteps });
-  };
-
-  const handleVolumeChange = (index: number, volume: number) => {
-    const newSteps = [...track.steps];
-    newSteps[index] = { ...newSteps[index], volume };
     onUpdate({ ...track, steps: newSteps });
   };
 
@@ -93,49 +88,55 @@ export function TrackEditor({
           {track.steps.map((step, index) => (
             <div key={index} className="flex flex-col items-center w-8">
               <div
-                className="relative w-1 h-32 bg-gray-200 rounded-none  cursor-pointer"
-                onClick={() => handleStepToggle(index)}
-                onMouseDown={(e) => {
+                className="relative w-1 h-32 bg-gray-200 rounded-none cursor-pointer"
+                onPointerDown={(e) => {
                   e.stopPropagation();
-                  const handleMouseMove = (e: MouseEvent) => {
-                    const rect = (
-                      e.target as HTMLElement
-                    ).getBoundingClientRect();
-                    const volume =
-                      1 -
-                      Math.max(
-                        0,
-                        Math.min(1, (e.clientY - rect.top) / rect.height)
-                      );
-                    handleVolumeChange(index, volume);
+                  const target = e.currentTarget;
+                  const rect = target.getBoundingClientRect();
+                  let startY = e.clientY;
+                  let startVolume = step.volume;
+
+                  const handlePointerMove = (e: PointerEvent) => {
+                    if (e.buttons !== 1) return; // 左クリック（またはタッチ）の場合のみ処理
+                    const deltaY = startY - e.clientY;
+                    const deltaVolume = deltaY / rect.height;
+                    const newVolume = Math.max(
+                      0,
+                      Math.min(1, startVolume + deltaVolume)
+                    );
+                    handleVolumeChange(index, newVolume);
                   };
-                  const handleMouseUp = () => {
-                    window.removeEventListener("mousemove", handleMouseMove);
-                    window.removeEventListener("mouseup", handleMouseUp);
+
+                  const handlePointerUp = () => {
+                    target.releasePointerCapture(e.pointerId);
+                    target.removeEventListener(
+                      "pointermove",
+                      handlePointerMove
+                    );
+                    target.removeEventListener("pointerup", handlePointerUp);
                   };
-                  window.addEventListener("mousemove", handleMouseMove);
-                  window.addEventListener("mouseup", handleMouseUp);
-                  handleMouseMove(e.nativeEvent);
+
+                  target.setPointerCapture(e.pointerId);
+                  target.addEventListener("pointermove", handlePointerMove);
+                  target.addEventListener("pointerup", handlePointerUp);
                 }}
                 style={{
-                  backgroundColor: step.active
-                    ? "black"
-                    : "#e5e7eb landscape:whitespace-nowrap",
+                  backgroundColor: "#e5e7eb",
                 }}
-                aria-label={`ステップ ${index + 1}, アクティブ: ${
-                  step.active ? "はい" : "いいえ"
-                }, 音量: ${Math.round(step.volume * 100)}%`}
+                aria-label={`ステップ ${index + 1}, 音量: ${Math.round(
+                  step.volume * 100
+                )}%`}
                 role="slider"
                 aria-valuemin={0}
-                aria-valuemax={1}
-                aria-valuenow={step.volume}
+                aria-valuemax={100}
+                aria-valuenow={Math.round(step.volume * 100)}
               >
                 <div
                   className="absolute w-6 h-6 p-0 text-xs transform -translate-x-1/2 left-1/2 rounded-none flex items-center justify-center"
                   style={{
                     bottom: `${step.volume * 100}%`,
-                    transition: "bottom 0.1s ease-out",
-                    backgroundColor: step.active ? "#666" : "#9ca3af",
+                    transition: "bottom 0.05s linear",
+                    backgroundColor: "#666",
                   }}
                 >
                   {index + 1}
@@ -152,7 +153,6 @@ export function TrackEditor({
               onValueChange={(value) =>
                 handlePitchChange(index, value as PitchName)
               }
-              disabled={!step.active}
             >
               <SelectTrigger className="w-8 h-8 p-0">
                 <SelectValue />
