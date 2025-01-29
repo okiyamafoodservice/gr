@@ -6,6 +6,7 @@ import { SampleEditor } from "./SampleEditor";
 import { useAudioContext } from "../hooks/useAudioContext";
 import type { RecordedSample } from "@/types/music";
 import { v4 as uuidv4 } from "uuid";
+import Image from "next/image";
 
 export function Synthesizer() {
   const audioContext = useAudioContext();
@@ -38,9 +39,11 @@ export function Synthesizer() {
   return (
     <div className="min-h-screen p-4 bg-slate-800 text-white">
       <h1 className="text-8xl font-bold mb-6 text-right text-primary ml-auto mr-0 w-auto">
-        <img
+        <Image
           src="/images/logo.svg"
           alt="browserMIDI ロゴ"
+          width={100} // 適切な幅に調整
+          height={50} // 適切な高さに調整
           className="ml-auto mr-0 w-auto align-center"
         />
       </h1>

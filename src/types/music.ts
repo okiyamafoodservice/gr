@@ -23,6 +23,6 @@ export interface RecordedSample {
   endTime: number;
 }
 
-export const STEPS_PER_BAR = 17;
+export const STEPS_PER_BAR = 16;
 export const BARS = 2;
 export const TOTAL_STEPS = STEPS_PER_BAR * BARS;

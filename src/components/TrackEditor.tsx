@@ -93,8 +93,8 @@ export function TrackEditor({
                   e.stopPropagation();
                   const target = e.currentTarget;
                   const rect = target.getBoundingClientRect();
-                  let startY = e.clientY;
-                  let startVolume = step.volume;
+                  const startY = e.clientY;
+                  const startVolume = step.volume;
 
                   const handlePointerMove = (e: PointerEvent) => {
                     if (e.buttons !== 1) return; // 左クリック（またはタッチ）の場合のみ処理
