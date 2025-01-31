@@ -61,7 +61,11 @@ export function TrackEditor({
           </SelectContent>
         </Select>
         {track.soundType === "recordedSample" && (
-          <Select value={track.sampleId} onValueChange={handleSampleChange}>
+          <Select
+            value={track.sampleId}
+            defaultValue="C2"
+            onValueChange={handleSampleChange}
+          >
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="サンプルを選択" />
             </SelectTrigger>
@@ -134,8 +138,8 @@ export function TrackEditor({
                 <div
                   className="absolute w-6 h-6 p-0 text-xs transform -translate-x-1/2 left-1/2 rounded-none flex items-center justify-center"
                   style={{
-                    bottom: `${step.volume * 100}%`,
-                    transition: "bottom 0.05s linear",
+                    bottom: `${step.volume * 83}%`,
+                    transition: "bottom 0.01s linear",
                     backgroundColor: "#666",
                   }}
                 >

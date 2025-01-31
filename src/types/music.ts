@@ -13,6 +13,7 @@ export interface Track {
   soundType: SoundType;
   steps: TrackStep[];
   sampleId?: string;
+  title?: string;
 }
 
 export interface RecordedSample {
@@ -21,6 +22,13 @@ export interface RecordedSample {
   name: string;
   startTime: number;
   endTime: number;
+}
+
+export interface Project {
+  name: string;
+  tracks: Track[];
+  bpm: number;
+  recordedSamples: RecordedSample[];
 }
 
 export const STEPS_PER_BAR = 16;

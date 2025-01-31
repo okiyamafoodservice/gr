@@ -40,7 +40,7 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
       id: uuidv4(),
       soundType: "synth",
       steps: Array(TOTAL_STEPS).fill({
-        pitch: "C" as PitchName,
+        pitch: "C2" as PitchName,
         volume: 0, // 初期音量をゼロに設定
       }),
     };
@@ -105,6 +105,10 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
             if (sample) {
               source = audioContext.createBufferSource();
               source.buffer = sample.buffer;
+              source.playbackRate.setValueAtTime(
+                pitches[pitch],
+                audioContext.currentTime
+              ); // ピッチ変更
               applyEnvelope(envelopeGain, audioContext, 0.005, 0.1, 0.7, 0.2);
               source.start(
                 0,

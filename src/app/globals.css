@@ -4,6 +4,7 @@
 
 body {
   font-family: var(--font-dotgothic16), serif;
+  user-select: none;
 }
 
 h1 {
