@@ -1,3 +1,5 @@
+// utils/audio.ts
+
 export function createOscillator(
   context: AudioContext,
   frequency: number
@@ -164,13 +166,6 @@ export function createKick(context: AudioContext): AudioBufferSourceNode {
   return source;
 }
 
-// interface EnvelopeOptions {
-//   attack: number;
-//   decay: number;
-//   sustain: number;
-//   release: number;
-// }
-
 export function createEnvelopeGain(context: AudioContext): GainNode {
   const gainNode = context.createGain();
   gainNode.gain.setValueAtTime(0, context.currentTime);
@@ -194,7 +189,7 @@ export function applyEnvelope(
   gainNode.gain.setValueAtTime(
     sustainLevel,
     now + attackTime + decayTime + 0.1
-  ); // サステイン期間を追加
+  );
   gainNode.gain.linearRampToValueAtTime(
     0,
     now + attackTime + decayTime + 0.1 + releaseTime
@@ -209,4 +204,71 @@ export async function loadAndCacheSounds(
     soundBuffers[key] = await loadAudioFile(context, path);
   }
   return soundBuffers;
+}
+
+/* ============================= */
+/* エフェクト関連のユーティリティ */
+/* ============================= */
+
+export function createDelay(
+  context: AudioContext,
+  delayTime: number = 0.5
+): DelayNode {
+  const delayNode = context.createDelay();
+  delayNode.delayTime.value = delayTime;
+  return delayNode;
+}
+
+export function createDistortion(
+  context: AudioContext,
+  amount: number = 50
+): WaveShaperNode {
+  const distortion = context.createWaveShaper();
+  const k = amount;
+  const n_samples = 44100;
+  const curve = new Float32Array(n_samples);
+  const deg = Math.PI / 180;
+  for (let i = 0; i < n_samples; ++i) {
+    const x = (i * 2) / n_samples - 1;
+    curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+  }
+  distortion.curve = curve;
+  distortion.oversample = "4x";
+  return distortion;
+}
+
+export async function createReverb(
+  context: AudioContext,
+  impulseUrl: string
+): Promise<ConvolverNode> {
+  const response = await fetch(impulseUrl);
+  const arrayBuffer = await response.arrayBuffer();
+  const impulseBuffer = await context.decodeAudioData(arrayBuffer);
+  const convolver = context.createConvolver();
+  convolver.buffer = impulseBuffer;
+  return convolver;
+}
+
+export function createFlanger(
+  context: AudioContext,
+  depth: number = 0.002,
+  rate: number = 0.25
+): AudioNode {
+  const delay = context.createDelay();
+  // 基本のディレイタイム（非常に短い時間）
+  delay.delayTime.value = 0.005;
+
+  // LFO（低周波オシレーター）を使って delayTime をモジュレーション
+  const lfo = context.createOscillator();
+  lfo.type = "sine";
+  lfo.frequency.value = rate; // フランジャーの速度
+
+  const lfoGain = context.createGain();
+  lfoGain.gain.value = depth; // フランジャーの深さ
+
+  lfo.connect(lfoGain);
+  lfoGain.connect(delay.delayTime);
+  lfo.start();
+
+  return delay;
 }

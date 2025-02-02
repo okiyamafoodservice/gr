@@ -1,11 +1,17 @@
 "use client";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import type { RecordedSample } from "../types/music";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { useAudioContext } from "../hooks/useAudioContext";
-import { cutAudioBuffer } from "@/utils/audio";
+import {
+  cutAudioBuffer,
+  createDelay,
+  createDistortion,
+  createFlanger,
+} from "@/utils/audio";
 import { WaveformDisplay } from "./WaveformDisplay";
+import { EffectsPanel, EffectType, EffectParameters } from "./EffectsPanel";
 
 interface SampleEditorProps {
   sample: RecordedSample;
@@ -19,6 +25,21 @@ export function SampleEditor({ sample, onUpdate }: SampleEditorProps) {
   const [endTime, setEndTime] = useState(sample.endTime);
   const audioSourceRef = useRef<AudioBufferSourceNode | null>(null);
 
+  // エフェクト設定用の状態
+  const [selectedEffect, setSelectedEffect] = useState<EffectType>("none");
+  const [effectParameters, setEffectParameters] = useState<EffectParameters>(
+    {}
+  );
+
+  // onEffectChange を useCallback でメモ化
+  const handleEffectChange = useCallback(
+    (effect: EffectType, parameters: EffectParameters) => {
+      setSelectedEffect(effect);
+      setEffectParameters(parameters);
+    },
+    []
+  );
+
   useEffect(() => {
     return () => {
       if (audioSourceRef.current) {
@@ -27,7 +48,34 @@ export function SampleEditor({ sample, onUpdate }: SampleEditorProps) {
     };
   }, []);
 
-  const playSound = () => {
+  // エフェクトチェーンを構築する関数
+  const createEffectsChain = async (): Promise<AudioNode | null> => {
+    if (!audioContext) return null;
+
+    switch (selectedEffect) {
+      case "delay":
+        return createDelay(
+          audioContext,
+          (effectParameters as { delayTime: number }).delayTime || 0.5
+        );
+      case "distortion":
+        return createDistortion(
+          audioContext,
+          (effectParameters as { amount: number }).amount || 50
+        );
+      case "flanger":
+        const params = effectParameters as { depth: number; rate: number };
+        return createFlanger(
+          audioContext,
+          params.depth || 0.002,
+          params.rate || 0.25
+        );
+      default:
+        return null;
+    }
+  };
+
+  const playSound = async () => {
     if (!audioContext) return;
 
     if (audioSourceRef.current) {
@@ -36,7 +84,24 @@ export function SampleEditor({ sample, onUpdate }: SampleEditorProps) {
 
     const source = audioContext.createBufferSource();
     source.buffer = sample.buffer;
-    source.connect(audioContext.destination);
+
+    // マスターゲインを作成
+    const masterGain = audioContext.createGain();
+    masterGain.gain.setValueAtTime(1, audioContext.currentTime);
+
+    // エフェクトチェーンのノードを取得
+    const effectNode = await createEffectsChain();
+
+    // 信号チェーンの構築:
+    // source -> (effectNode?) -> masterGain -> destination
+    if (effectNode) {
+      source.connect(effectNode);
+      effectNode.connect(masterGain);
+    } else {
+      source.connect(masterGain);
+    }
+    masterGain.connect(audioContext.destination);
+
     source.start(0, startTime, endTime - startTime);
     audioSourceRef.current = source;
     setIsPlaying(true);
@@ -88,6 +153,8 @@ export function SampleEditor({ sample, onUpdate }: SampleEditorProps) {
           onTimeRangeChange={handleTimeRangeChange}
         />
       </div>
+      {/* エフェクト設定パネル */}
+      <EffectsPanel onEffectChange={handleEffectChange} />
       <div className="space-y-4">
         <div>
           <label className="block text-sm font-medium mb-1">

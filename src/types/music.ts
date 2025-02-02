@@ -31,6 +31,6 @@ export interface Project {
   recordedSamples: RecordedSample[];
 }
 
-export const STEPS_PER_BAR = 16;
+export const STEPS_PER_BAR = 4;
 export const BARS = 2;
 export const TOTAL_STEPS = STEPS_PER_BAR * BARS;
