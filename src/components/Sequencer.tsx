@@ -52,7 +52,7 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
           newSteps = newSteps.concat(
             Array(stepsToAdd).fill({
               active: false,
-              pitch: "C2" as PitchName,
+              pitch: "A4" as PitchName,
               volume: 0,
             })
           );
@@ -70,7 +70,7 @@ export function Sequencer({ recordedSamples }: SequencerProps) {
       soundType: "synth",
       steps: Array(totalSteps).fill({
         active: false,
-        pitch: "C2" as PitchName,
+        pitch: "A4" as PitchName,
         volume: 0,
       }),
     };
