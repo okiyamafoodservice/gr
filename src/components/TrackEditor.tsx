@@ -63,7 +63,7 @@ export function TrackEditor({
         {track.soundType === "recordedSample" && (
           <Select
             value={track.sampleId}
-            defaultValue="C2"
+            defaultValue="A4"
             onValueChange={handleSampleChange}
           >
             <SelectTrigger className="w-[120px]">
